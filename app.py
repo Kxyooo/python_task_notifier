@@ -107,7 +107,7 @@ HTML_TEMPLATE = """
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
         }
 
         .container {
@@ -117,6 +117,8 @@ HTML_TEMPLATE = """
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             overflow: hidden;
             border: 1px solid #e1e6ef; /* Subtle edge */
+            margin-top: 20px; /* To align with header padding */
+            margin-bottom: 20px;
         }
 
         /* --- Blue Header Section --- */
@@ -358,6 +360,27 @@ HTML_TEMPLATE = """
             background-color: #c0392b;
         }
 
+        .btn-blue:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
     </style>
 </head>
 <body>
@@ -393,7 +416,7 @@ HTML_TEMPLATE = """
                     </div>
                     <div class="task-actions">
                         <button class="edit-btn" data-id="{{ task.id }}">Edit</button>
-                        <button class="delete-btn" data-id="{{ task.id }}">Delete</button>
+                        <button class="delete-btn" data-id="{{ task.id }}">Remove</button>
                     </div>
                 </div>
                 {% endfor %}
@@ -405,7 +428,7 @@ HTML_TEMPLATE = """
                     <input type="text" id="assigned-to" class="form-input" placeholder="Assigned to" required>
                     <input type="email" id="email" class="form-input" placeholder="Email" required>
                     <input type="date" id="deadline" class="form-input" required>
-                    <button type="submit" class="btn btn-blue">Add Task</button>
+                    <button type="submit" class="btn btn-blue" id="add-task-submit">Add Task</button>
                 </form>
             </div>
         </div>
@@ -422,6 +445,10 @@ HTML_TEMPLATE = """
             const assignedTo = document.getElementById('assigned-to').value;
             const email = document.getElementById('email').value;
             const deadline = document.getElementById('deadline').value;
+
+            const submitBtn = document.getElementById('add-task-submit');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span>Sending...';
 
             fetch('/add_task', {
                 method: 'POST',
@@ -442,11 +469,15 @@ HTML_TEMPLATE = """
                     location.reload();
                 } else {
                     alert('Error: ' + data.error);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Add Task';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 alert('An error occurred while adding the task.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Add Task';
             });
         });
 

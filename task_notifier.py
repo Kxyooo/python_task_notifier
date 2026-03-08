@@ -25,11 +25,10 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))  # 587=STARTTLS (recommended), 465=SSL
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "developer.khendiaz@gmail.com")
-SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "mgag bhri sogt iqqr")
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "")
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "")
 TASKS_FILE = Path(__file__).parent / "tasks.json"
 # ---------------------------------------------------------------------------
-
 
 @contextmanager
 def _smtp_connection():
