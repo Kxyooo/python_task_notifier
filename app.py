@@ -284,7 +284,7 @@ HTML_TEMPLATE = """
 <body>
     <div class="container">
         <div class="header">
-            <h1>Task Reminder</h1>
+            <h1>Task Reminder System</h1>
             <p>Stay on top of your activities with email notifications</p>
             <div class="email-info">
                 <span class="p-icon">p</span>
