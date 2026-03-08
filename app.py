@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, request, jsonify
+from flask import Flask, render_template_string, request, jsonify, session, redirect, url_for
 import json
 from pathlib import Path
 from task_notifier import load_tasks, send_assignment_notification
@@ -8,6 +8,23 @@ app = Flask(__name__)
 
 TASKS_FILE = Path(__file__).parent / "tasks.json"
 LAST_SENT_FILE = Path(__file__).parent / "last_sent.txt"
+
+# simple user store - replace with real datastore or env variables in production
+USERS = {
+    "Admin": "Password123"
+}
+
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
+
+
+def login_required(func):
+    from functools import wraps
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not session.get("user"):
+            return redirect(url_for("login"))
+        return func(*args, **kwargs)
+    return wrapper
 
 def save_tasks(tasks: list[dict]) -> None:
     """Save task list to JSON file."""
@@ -27,6 +44,36 @@ def load_last_sent() -> str:
     return ""
 
 # HTML Template defined as a Python string
+LOGIN_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Task Reminder</title>
+    <style>
+        body { font-family: Arial, sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; background:#f1f3f7; }
+        .login-box { background:#fff; padding:20px 30px; border-radius:8px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:300px; }
+        .login-box h2 { margin-top:0; }
+        .login-box input { width:100%; padding:8px; margin:8px 0; border:1px solid #ccc; border-radius:4px; }
+        .login-box button { width:100%; padding:10px; background:#3260de; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+        .error { color:red; font-size:0.9em; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>Login</h2>
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+        <form method="post">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Log In</button>
+        </form>
+    </div>
+</body>
+</html>
+"""
+
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en">
@@ -301,6 +348,7 @@ HTML_TEMPLATE = """
                 <div class="action-buttons">
                     <button class="btn btn-light">Check & Notify</button>
                     <button class="btn btn-blue" id="add-task-btn"><span>+</span> Add Task</button>
+                    <a href="/logout" class="btn btn-light">Logout</a>
                 </div>
             </div>
 
@@ -372,6 +420,7 @@ HTML_TEMPLATE = """
 """
 
 @app.route('/')
+@login_required
 def home():
     tasks = load_tasks(TASKS_FILE)
     active_count = sum(1 for t in tasks if not t.get("completed", False))
@@ -379,7 +428,28 @@ def home():
     last_sent = load_last_sent()
     return render_template_string(HTML_TEMPLATE, tasks=tasks, active_count=active_count, completed_count=completed_count, last_sent=last_sent)
 
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if USERS.get(username) == password:
+            session['user'] = username
+            return redirect(url_for('home'))
+        else:
+            error = 'Invalid credentials'
+    return render_template_string(LOGIN_TEMPLATE, error=error)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
+
 @app.route('/add_task', methods=['POST'])
+@login_required
 def add_task():
     data = request.get_json()
     title = data.get('title')
