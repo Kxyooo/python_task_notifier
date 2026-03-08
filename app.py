@@ -565,24 +565,32 @@ def add_task():
     if not all([title, assigned_to, email, deadline]):
         return jsonify({'error': 'All fields are required'}), 400
     
-    tasks = load_tasks(TASKS_FILE)
-    new_id = max(t['id'] for t in tasks) + 1 if tasks else 1
-    new_task = {
-        'id': new_id,
-        'title': title,
-        'assigned_to': assigned_to,
-        'email': email,
-        'deadline': deadline,
-        'completed': False
-    }
-    tasks.append(new_task)
-    save_tasks(tasks)
-    
-    # Send assignment notification
-    send_assignment_notification(new_task)
-    save_last_sent(new_task['email'])
-    
-    return jsonify({'message': 'Task added successfully', 'task': new_task})
+    try:
+        tasks = load_tasks(TASKS_FILE)
+        new_id = max(t['id'] for t in tasks) + 1 if tasks else 1
+        new_task = {
+            'id': new_id,
+            'title': title,
+            'assigned_to': assigned_to,
+            'email': email,
+            'deadline': deadline,
+            'completed': False
+        }
+        tasks.append(new_task)
+        save_tasks(tasks)
+        
+        # Send assignment notification
+        email_sent = send_assignment_notification(new_task)
+        if email_sent:
+            save_last_sent(new_task['email'])
+            message = 'Task added successfully and notification sent!'
+        else:
+            message = 'Task added but email notification failed. Check server logs.'
+        
+        return jsonify({'message': message, 'task': new_task, 'email_sent': email_sent})
+    except Exception as e:
+        print(f"[ERROR] Exception in add_task: {e}")
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
 
 @app.route('/edit_task', methods=['POST'])

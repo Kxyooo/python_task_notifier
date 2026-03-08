@@ -13,18 +13,19 @@ Setup:
 import json
 import smtplib
 import ssl
+import os
 from datetime import date
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# CONFIG — update these values before running
+# CONFIG — Read from environment variables or use defaults for local dev
 # ---------------------------------------------------------------------------
-SMTP_HOST = "smtp.gmail.com"
-SMTP_PORT = 465                        # 465 = SSL, 587 = STARTTLS
-SENDER_EMAIL = "licayanelisonbrent@gmail.com"  # sender / notification account
-SENDER_PASSWORD = "hjzqdoajxyvsniks"  # App Password (not your normal password)
+SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", 465))
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "licayanelisonbrent@gmail.com")
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "hjzqdoajxyvsniks")
 TASKS_FILE = Path(__file__).parent / "tasks.json"
 # ---------------------------------------------------------------------------
 
@@ -175,23 +176,33 @@ def build_assignment_email(sender: str, task: dict) -> MIMEMultipart:
     return message
 
 
-def send_assignment_notification(task: dict) -> None:
-    """Send email notification for a newly assigned task."""
-    context = ssl.create_default_context()
-
-    print(f"Connecting to {SMTP_HOST}:{SMTP_PORT} ...")
-    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context) as server:
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        print("Login successful.\n")
-
-        try:
+def send_assignment_notification(task: dict) -> bool:
+    """Send email notification for a newly assigned task. Returns True if successful."""
+    try:
+        print(f"[INFO] Attempting to send email to {task['email']}...")
+        print(f"[INFO] Using SMTP: {SMTP_HOST}:{SMTP_PORT}")
+        
+        if not SENDER_EMAIL or not SENDER_PASSWORD:
+            print("[ERROR] SMTP credentials not configured. Set SENDER_EMAIL and SENDER_PASSWORD environment variables.")
+            return False
+        
+        context = ssl.create_default_context()
+        
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context, timeout=10) as server:
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
             email = build_assignment_email(SENDER_EMAIL, task)
             server.sendmail(SENDER_EMAIL, task["email"], email.as_string())
-            print(f"  [ASSIGNED] Sent notification to {task['email']} — \"{task['title']}\"")
-        except smtplib.SMTPException as exc:
-            print(f"  [ERROR] Failed to send to {task['email']}: {exc}")
-
-    print("\nDone. Assignment notification sent.")
+            print(f"[SUCCESS] Sent notification to {task['email']} — \"{task['title']}\"")
+            return True
+    except smtplib.SMTPAuthenticationError as exc:
+        print(f"[ERROR] Authentication failed: {exc}. Check SENDER_EMAIL and SENDER_PASSWORD.")
+        return False
+    except smtplib.SMTPException as exc:
+        print(f"[ERROR] SMTP error: {exc}")
+        return False
+    except Exception as exc:
+        print(f"[ERROR] Unexpected error: {type(exc).__name__}: {exc}")
+        return False
 
 
 def print_summary(tasks: list[dict], incomplete: list[dict]) -> None:
