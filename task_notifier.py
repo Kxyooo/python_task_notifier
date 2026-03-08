@@ -22,13 +22,29 @@ from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # CONFIG — Set these as environment variables (required on Railway)
+# On Railway: set RESEND_API_KEY (SMTP is blocked by Railway's network)
+# Locally: set SENDER_EMAIL + SENDER_PASSWORD for SMTP fallback
 # ---------------------------------------------------------------------------
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))  # 587=STARTTLS (recommended), 465=SSL
+SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "")
 TASKS_FILE = Path(__file__).parent / "tasks.json"
 # ---------------------------------------------------------------------------
+
+
+def _send_via_resend(to_email: str, subject: str, html_body: str) -> None:
+    """Send email using Resend HTTPS API (works on Railway)."""
+    import resend
+    resend.api_key = RESEND_API_KEY
+    resend.Emails.send({
+        "from": f"Task Notifier <onboarding@resend.dev>",
+        "to": [to_email],
+        "subject": subject,
+        "html": html_body,
+    })
+
 
 @contextmanager
 def _smtp_connection():
@@ -193,18 +209,45 @@ def send_assignment_notification(task: dict) -> bool:
     """Send email notification for a newly assigned task. Returns True if successful."""
     try:
         print(f"[INFO] Attempting to send email to {task['email']}...")
-        print(f"[INFO] Using SMTP: {SMTP_HOST}:{SMTP_PORT}")
-        
-        if not SENDER_EMAIL or not SENDER_PASSWORD:
-            print("[ERROR] SMTP credentials not configured. Set SENDER_EMAIL and SENDER_PASSWORD environment variables.")
-            return False
-        
-        with _smtp_connection() as server:
-            server.login(SENDER_EMAIL, SENDER_PASSWORD)
-            email = build_assignment_email(SENDER_EMAIL, task)
-            server.sendmail(SENDER_EMAIL, task["email"], email.as_string())
-            print(f"[SUCCESS] Sent notification to {task['email']} — \"{task['title']}\"")
-            return True
+
+        assigned_to = task["assigned_to"]
+        title = task["title"]
+        deadline = task["deadline"]
+        html_body = f"""
+        <html>
+          <body style="font-family: Arial, sans-serif; color: #333;">
+            <h2 style="color: #27ae60;">&#10003; New Task Assigned</h2>
+            <p>Hi <strong>{assigned_to}</strong>,</p>
+            <p>You have been assigned a new task:</p>
+            <table border="1" cellpadding="8" cellspacing="0"
+                   style="border-collapse:collapse; width:100%; max-width:500px;">
+              <tr style="background:#f2f2f2;"><th align="left">Field</th><th align="left">Details</th></tr>
+              <tr><td><strong>Task</strong></td><td>{title}</td></tr>
+              <tr><td><strong>Deadline</strong></td><td>{deadline}</td></tr>
+              <tr><td><strong>Status</strong></td><td style="color:orange;">Assigned</td></tr>
+            </table>
+            <p>Please complete this task by the deadline.</p>
+            <p>Thank you,<br/>Task Management System</p>
+          </body>
+        </html>
+        """
+        subject = f"[ASSIGNED] New Task: {title}"
+
+        if RESEND_API_KEY:
+            print("[INFO] Using Resend API...")
+            _send_via_resend(task["email"], subject, html_body)
+        else:
+            print(f"[INFO] Using SMTP: {SMTP_HOST}:{SMTP_PORT}")
+            if not SENDER_EMAIL or not SENDER_PASSWORD:
+                print("[ERROR] SMTP credentials not configured. Set SENDER_EMAIL and SENDER_PASSWORD environment variables.")
+                return False
+            with _smtp_connection() as server:
+                server.login(SENDER_EMAIL, SENDER_PASSWORD)
+                email = build_assignment_email(SENDER_EMAIL, task)
+                server.sendmail(SENDER_EMAIL, task["email"], email.as_string())
+
+        print(f"[SUCCESS] Sent notification to {task['email']} — \"{task['title']}\"")
+        return True
     except smtplib.SMTPAuthenticationError as exc:
         print(f"[ERROR] Authentication failed: {exc}. Check SENDER_EMAIL and SENDER_PASSWORD.")
         return False
