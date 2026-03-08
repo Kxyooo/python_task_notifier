@@ -326,6 +326,38 @@ HTML_TEMPLATE = """
             margin-bottom: 10px;
         }
 
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: var(--font-family);
+        }
+
+        .edit-btn {
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #357abd;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
     </style>
 </head>
 <body>
@@ -354,12 +386,15 @@ HTML_TEMPLATE = """
 
             <div class="task-list">
                 {% for task in tasks %}
-                <div class="task-item">
+                <div class="task-item" data-task-id="{{ task.id }}">
                     <div class="task-left">
                         <div class="circle-icon"></div>
                         <span class="task-title">{{ task.title }}</span>
                     </div>
-                    <div class="trash-icon"></div>
+                    <div class="task-actions">
+                        <button class="edit-btn" data-id="{{ task.id }}">Edit</button>
+                        <button class="delete-btn" data-id="{{ task.id }}">Delete</button>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -404,7 +439,7 @@ HTML_TEMPLATE = """
             .then(data => {
                 if (data.message) {
                     alert('Task added successfully!');
-                    location.reload(); // Reload to show new task
+                    location.reload();
                 } else {
                     alert('Error: ' + data.error);
                 }
@@ -412,6 +447,76 @@ HTML_TEMPLATE = """
             .catch(error => {
                 console.error('Error:', error);
                 alert('An error occurred while adding the task.');
+            });
+        });
+
+        // Edit task
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const taskId = this.getAttribute('data-id');
+                const taskItem = document.querySelector(`[data-task-id="${taskId}"]`);
+                const taskTitle = taskItem.querySelector('.task-title').textContent;
+                
+                const newTitle = prompt('Edit task title:', taskTitle);
+                if (newTitle && newTitle.trim() !== '') {
+                    fetch('/edit_task', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: taskId,
+                            title: newTitle.trim()
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            alert('Task updated successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while editing the task.');
+                    });
+                }
+            });
+        });
+
+        // Delete task
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const taskId = this.getAttribute('data-id');
+                const taskItem = document.querySelector(`[data-task-id="${taskId}"]`);
+                const taskTitle = taskItem.querySelector('.task-title').textContent;
+                
+                if (confirm(`Are you sure you want to delete "${taskTitle}"?`)) {
+                    fetch('/delete_task', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            id: taskId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            alert('Task deleted successfully!');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the task.');
+                    });
+                }
             });
         });
     </script>
@@ -479,10 +584,47 @@ def add_task():
     
     return jsonify({'message': 'Task added successfully', 'task': new_task})
 
+
+@app.route('/edit_task', methods=['POST'])
+@login_required
+def edit_task():
+    data = request.get_json()
+    task_id = int(data.get('id'))
+    new_title = data.get('title')
+    
+    if not new_title or not new_title.strip():
+        return jsonify({'error': 'Title cannot be empty'}), 400
+    
+    tasks = load_tasks(TASKS_FILE)
+    task = next((t for t in tasks if t['id'] == task_id), None)
+    
+    if not task:
+        return jsonify({'error': 'Task not found'}), 404
+    
+    task['title'] = new_title.strip()
+    save_tasks(tasks)
+    
+    return jsonify({'message': 'Task updated successfully', 'task': task})
+
+
+@app.route('/delete_task', methods=['POST'])
+@login_required
+def delete_task():
+    data = request.get_json()
+    task_id = int(data.get('id'))
+    
+    tasks = load_tasks(TASKS_FILE)
+    original_count = len(tasks)
+    tasks = [t for t in tasks if t['id'] != task_id]
+    
+    if len(tasks) == original_count:
+        return jsonify({'error': 'Task not found'}), 404
+    
+    save_tasks(tasks)
+    return jsonify({'message': 'Task deleted successfully'})
+
 if __name__ == '__main__':
     # Start the Flask web server
     port = int(os.environ.get('PORT', 5000))
     print(f"Starting server... Open http://127.0.0.1:{port} in your browser.")
     app.run(host='0.0.0.0', port=port, debug=False)
-
-    
