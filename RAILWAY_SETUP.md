@@ -11,13 +11,13 @@ For the email notifications to work on Railway, you need to set the following en
 
 ### Required Variables
 
-| Variable | Value | Example |
-|----------|-------|---------|
-| `SENDER_EMAIL` | Your Gmail address | `your-email@gmail.com` |
-| `SENDER_PASSWORD` | Gmail App Password | (see below) |
-| `SMTP_HOST` | SMTP server | `smtp.gmail.com` |
-| `SMTP_PORT` | SMTP port | `465` |
-| `SECRET_KEY` | Flask session key | Any random string |
+| Variable          | Value              | Example                                                 |
+| ----------------- | ------------------ | ------------------------------------------------------- |
+| `SENDER_EMAIL`    | Your Gmail address | `your-email@gmail.com`                                  |
+| `SENDER_PASSWORD` | Gmail App Password | (see below)                                             |
+| `SMTP_HOST`       | SMTP server        | `smtp.gmail.com`                                        |
+| `SMTP_PORT`       | SMTP port          | `587` (use 587 for STARTTLS — more reliable on Railway) |
+| `SECRET_KEY`      | Flask session key  | Any random string                                       |
 
 ### Getting Gmail App Password
 
@@ -34,29 +34,33 @@ For the email notifications to work on Railway, you need to set the following en
 SENDER_EMAIL=your-email@gmail.com
 SENDER_PASSWORD=xxxx xxxx xxxx xxxx
 SMTP_HOST=smtp.gmail.com
-SMTP_PORT=465
+SMTP_PORT=587
 SECRET_KEY=your-secret-key-here
 ```
 
 ## Testing
 
 After deployment on Railway:
+
 1. Log in with credentials: `admin` / `password123`
 2. Add a new task
 3. Check the server logs for email sending status
 
 Look for messages like:
+
 - `[SUCCESS] Sent notification to...` - Email sent successfully
 - `[ERROR]` - Email sending failed (check credentials)
 
 ## Troubleshooting
 
 ### Email not sending locally
+
 - Make sure `SENDER_EMAIL` and `SENDER_PASSWORD` are set (or use the hardcoded defaults)
 - Check that 2-Step Verification is enabled on Gmail
 - Verify you're using an App Password, not your regular Gmail password
 
 ### Email not sending on Railway
+
 - Confirm all environment variables are set in Railway dashboard
 - Check Railway logs for error messages
 - Ensure the Remote SMTP server is accessible (port 465 should be open)

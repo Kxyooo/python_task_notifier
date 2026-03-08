@@ -14,20 +14,36 @@ import json
 import smtplib
 import ssl
 import os
+from contextlib import contextmanager
 from datetime import date
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# CONFIG — Read from environment variables or use defaults for local dev
+# CONFIG — Set these as environment variables (required on Railway)
 # ---------------------------------------------------------------------------
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", 465))
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "licayanelisonbrent@gmail.com")
-SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "hjzqdoajxyvsniks")
+SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))  # 587=STARTTLS (recommended), 465=SSL
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "developer.khendiaz@gmail.com")
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "mgag bhri sogt iqqr")
 TASKS_FILE = Path(__file__).parent / "tasks.json"
 # ---------------------------------------------------------------------------
+
+
+@contextmanager
+def _smtp_connection():
+    """Open an SMTP connection using STARTTLS (port 587) or SSL (port 465)."""
+    context = ssl.create_default_context()
+    if SMTP_PORT == 465:
+        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context, timeout=30) as server:
+            yield server
+    else:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=30) as server:
+            server.ehlo()
+            server.starttls(context=context)
+            server.ehlo()
+            yield server
 
 
 def load_tasks(filepath: Path) -> list[dict]:
@@ -111,10 +127,8 @@ def send_notifications(incomplete_tasks: list[dict]) -> None:
         print("No incomplete/overdue tasks found. No emails sent.")
         return
 
-    context = ssl.create_default_context()
-
     print(f"Connecting to {SMTP_HOST}:{SMTP_PORT} ...")
-    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context) as server:
+    with _smtp_connection() as server:
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         print("Login successful.\n")
 
@@ -186,9 +200,7 @@ def send_assignment_notification(task: dict) -> bool:
             print("[ERROR] SMTP credentials not configured. Set SENDER_EMAIL and SENDER_PASSWORD environment variables.")
             return False
         
-        context = ssl.create_default_context()
-        
-        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=context, timeout=10) as server:
+        with _smtp_connection() as server:
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             email = build_assignment_email(SENDER_EMAIL, task)
             server.sendmail(SENDER_EMAIL, task["email"], email.as_string())
