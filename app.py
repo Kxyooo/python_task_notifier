@@ -2,6 +2,7 @@ from flask import Flask, render_template_string, request, jsonify
 import json
 from pathlib import Path
 from task_notifier import load_tasks, send_assignment_notification
+import os
 
 app = Flask(__name__)
 
@@ -410,7 +411,8 @@ def add_task():
 
 if __name__ == '__main__':
     # Start the Flask web server
-    print("Starting server... Open http://127.0.0.1:5000 in your browser.")
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    print(f"Starting server... Open http://127.0.0.1:{port} in your browser.")
+    app.run(host='0.0.0.0', port=port, debug=False)
 
     
