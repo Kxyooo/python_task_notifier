@@ -22,10 +22,10 @@ from pathlib import Path
 
 # ---------------------------------------------------------------------------
 # CONFIG — Set these as environment variables (required on Railway)
-# On Railway: set RESEND_API_KEY (SMTP is blocked by Railway's network)
+# On Railway: set SENDGRID_API_KEY (SMTP is blocked by Railway's network)
 # Locally: set SENDER_EMAIL + SENDER_PASSWORD for SMTP fallback
 # ---------------------------------------------------------------------------
-RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "")
@@ -34,16 +34,18 @@ TASKS_FILE = Path(__file__).parent / "tasks.json"
 # ---------------------------------------------------------------------------
 
 
-def _send_via_resend(to_email: str, subject: str, html_body: str) -> None:
-    """Send email using Resend HTTPS API (works on Railway)."""
-    import resend
-    resend.api_key = RESEND_API_KEY
-    resend.Emails.send({
-        "from": f"Task Notifier <onboarding@resend.dev>",
-        "to": [to_email],
-        "subject": subject,
-        "html": html_body,
-    })
+def _send_via_sendgrid(to_email: str, subject: str, html_body: str) -> None:
+    """Send email using SendGrid HTTPS API (works on Railway)."""
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail
+    message = Mail(
+        from_email=SENDER_EMAIL or "noreply@example.com",
+        to_emails=to_email,
+        subject=subject,
+        html_content=html_body,
+    )
+    sg = SendGridAPIClient(SENDGRID_API_KEY)
+    sg.send(message)
 
 
 @contextmanager
@@ -233,9 +235,9 @@ def send_assignment_notification(task: dict) -> bool:
         """
         subject = f"[ASSIGNED] New Task: {title}"
 
-        if RESEND_API_KEY:
-            print("[INFO] Using Resend API...")
-            _send_via_resend(task["email"], subject, html_body)
+        if SENDGRID_API_KEY:
+            print("[INFO] Using SendGrid API...")
+            _send_via_sendgrid(task["email"], subject, html_body)
         else:
             print(f"[INFO] Using SMTP: {SMTP_HOST}:{SMTP_PORT}")
             if not SENDER_EMAIL or not SENDER_PASSWORD:
