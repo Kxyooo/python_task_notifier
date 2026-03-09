@@ -28,8 +28,8 @@ from pathlib import Path
 SENDGRID_API_KEY = os.environ.get("SENDGRID_API_KEY", "")
 SMTP_HOST = os.environ.get("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("SMTP_PORT", 587))
-SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "")
-SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "")
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "licayanelisonbrent@gmail.com") 
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "hdxq glnp xqqb rsjj")
 TASKS_FILE = Path(__file__).parent / "tasks.json"
 # ---------------------------------------------------------------------------
 
