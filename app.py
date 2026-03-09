@@ -352,30 +352,70 @@ HTML_TEMPLATE = """
 
         body {
             font-family: var(--font-family);
-            background-color: var(--bg-color);
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            background: linear-gradient(180deg, #5a2a7a 0%, #3d1e5c 30%, #2a1845 60%, #1a0f2e 100%);
+            position: relative;
+            color: #ffffff;
+        }
+
+        /* starfield */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 50px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 10px, #eee, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: twinkle 5s ease-in-out infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* mountains */
+        body::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="mg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(0,0,0,0.3)"/><stop offset="100%" style="stop-color:rgba(0,0,0,0.7)"/></linearGradient></defs><path fill="url(%23mg)" d="M0,250 L100,150 L150,200 L250,80 L350,180 L450,100 L550,160 L650,90 L750,170 L850,110 L950,190 L1050,120 L1150,180 L1200,150 L1200,400 L0,400 Z"/><path fill="rgba(0,0,0,0.2)" d="M0,300 L80,220 L180,280 L280,200 L380,270 L480,210 L580,260 L680,200 L780,250 L880,190 L980,240 L1080,180 L1180,220 L1200,200 L1200,400 L0,400 Z"/></svg>') repeat-x;
+            background-size: 1200px 400px;
+            opacity: 0.8;
+            pointer-events: none;
         }
 
         .container {
             width: 780px; /* Matched to image proportions */
-            background-color: var(--content-bg);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             overflow: hidden;
-            border: 1px solid #e1e6ef; /* Subtle edge */
+            border: 1px solid rgba(255,255,255,0.2);
             margin-top: 20px; /* To align with header padding */
             margin-bottom: 20px;
         }
 
         /* --- Blue Header Section --- */
         .header {
-            background-color: var(--primary-blue);
+            background: transparent;
             padding: 30px 40px;
-            color: var(--text-on-blue);
+            color: #ffffff;
         }
 
         .header h1 {
