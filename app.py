@@ -195,9 +195,14 @@ LOGIN_TEMPLATE = """
             border: none;
             color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
-            font-size: 16px;
+            font-size: 12px;
             transition: all 0.3s;
-            padding: 5px;
+            padding: 2px;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .toggle-password:hover {
