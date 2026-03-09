@@ -188,22 +188,7 @@ LOGIN_TEMPLATE = """
             pointer-events: none;
         }
 
-        .toggle-password {
-            position: absolute;
-            right: 14px;
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.7);
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-            padding: 2px;
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+
 
         .toggle-password:hover {
             color: rgba(255, 255, 255, 1);
@@ -303,9 +288,7 @@ LOGIN_TEMPLATE = """
                     <div class="input-wrapper">
                         <i class="fas fa-lock icon"></i>
                         <input type="password" id="password" name="password" placeholder="Password" required>
-                        <button type="button" class="toggle-password" id="togglePassword" onclick="togglePassword()">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                        <i class="fas fa-eye" style="position:absolute; right:14px; color:rgba(255,255,255,0.7); font-size:12px;" aria-hidden="true"></i>
                     </div>
                 </div>
 
@@ -324,19 +307,6 @@ LOGIN_TEMPLATE = """
     </div>
 
     <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleBtn = document.getElementById('togglePassword');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
-            } else {
-                passwordInput.type = 'password';
-                toggleBtn.innerHTML = '<i class="fas fa-eye"></i>';
-            }
-        }
-
         // Add visual feedback on form submission
         document.getElementById('loginForm').addEventListener('submit', function() {
             const btn = this.querySelector('button[type="submit"]');
