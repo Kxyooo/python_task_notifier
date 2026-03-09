@@ -359,7 +359,8 @@ HTML_TEMPLATE = """
             min-height: 100vh;
             background: linear-gradient(180deg, #5a2a7a 0%, #3d1e5c 30%, #2a1845 60%, #1a0f2e 100%);
             position: relative;
-            color: #ffffff;
+            color: #3EB489; /* mint text */
+            text-shadow: 0 0 8px #3EB489, 0 0 16px #3EB489;
         }
 
         /* starfield */
@@ -422,6 +423,7 @@ HTML_TEMPLATE = """
             margin: 0;
             font-size: 30px;
             font-weight: 700;
+            color: #3EB489;
         }
 
         .header p {
@@ -429,6 +431,7 @@ HTML_TEMPLATE = """
             font-size: 13px;
             font-weight: 300;
             opacity: 0.9;
+            color: #3EB489;
         }
 
         .email-info {
@@ -468,7 +471,7 @@ HTML_TEMPLATE = """
             margin: 0;
             font-size: 20px;
             font-weight: 600;
-            color: var(--text-primary);
+            color: #3EB489;
         }
 
         .title-section .status {
