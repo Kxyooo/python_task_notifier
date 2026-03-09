@@ -60,79 +60,95 @@ LOGIN_TEMPLATE = """
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(180deg, #5a2a7a 0%, #3d1e5c 30%, #2a1845 60%, #1a0f2e 100%);
             position: relative;
             overflow: hidden;
         }
 
-        /* Animated background */
+        /* Starfield background */
         body::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: float 20s infinite linear;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 60px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 50px 50px, #ddd, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 90px 10px, #eee, rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: twinkle 5s ease-in-out infinite;
+            opacity: 0.6;
         }
 
-        @keyframes float {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Mountain silhouettes */
+        body::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="mg" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:rgba(0,0,0,0.3)"/><stop offset="100%" style="stop-color:rgba(0,0,0,0.7)"/></linearGradient></defs><path fill="url(%23mg)" d="M0,250 L100,150 L150,200 L250,80 L350,180 L450,100 L550,160 L650,90 L750,170 L850,110 L950,190 L1050,120 L1150,180 L1200,150 L1200,400 L0,400 Z"/><path fill="rgba(0,0,0,0.2)" d="M0,300 L80,220 L180,280 L280,200 L380,270 L480,210 L580,260 L680,200 L780,250 L880,190 L980,240 L1080,180 L1180,220 L1200,200 L1200,400 L0,400 Z"/></svg>') repeat-x;
+            background-size: 1200px 400px;
+            opacity: 0.8;
+            pointer-events: none;
         }
 
         .login-container {
             position: relative;
             z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .login-box {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(10px);
-            padding: 50px 40px;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 400px;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 45px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .login-box h2 {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
-            color: #333;
-            margin-bottom: 30px;
+            color: #ffffff;
+            margin-bottom: 35px;
             text-align: center;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
         .error {
-            color: #e74c3c;
-            font-size: 14px;
-            background: #fadbd8;
+            color: #ff6b6b;
+            font-size: 13px;
+            background: rgba(255, 107, 107, 0.15);
             padding: 10px 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            border-left: 4px solid #e74c3c;
+            border-left: 3px solid #ff6b6b;
+            border-radius: 6px;
         }
 
         .form-group {
             margin-bottom: 20px;
             position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: 500;
         }
 
         .input-wrapper {
@@ -143,42 +159,49 @@ LOGIN_TEMPLATE = """
 
         .form-group input {
             width: 100%;
-            padding: 12px 15px 12px 40px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-            background: #f8f9fa;
+            padding: 14px 16px 14px 45px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            font-size: 15px;
+            color: #ffffff;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
-            background: #fff;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
         }
 
         .form-group .icon {
             position: absolute;
-            left: 12px;
-            color: #999;
+            left: 14px;
+            color: rgba(255, 255, 255, 0.7);
             font-size: 16px;
+            pointer-events: none;
         }
 
         .toggle-password {
             position: absolute;
-            right: 12px;
+            right: 14px;
             background: none;
             border: none;
-            color: #667eea;
+            color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
             font-size: 16px;
-            padding: 5px;
             transition: all 0.3s;
+            padding: 5px;
         }
 
         .toggle-password:hover {
-            color: #764ba2;
+            color: rgba(255, 255, 255, 1);
             transform: scale(1.1);
         }
 
@@ -193,90 +216,63 @@ LOGIN_TEMPLATE = """
         .checkbox-wrapper {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .checkbox-wrapper input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             cursor: pointer;
-            accent-color: #667eea;
+            accent-color: #a855f7;
+            border-radius: 3px;
         }
 
         .checkbox-wrapper label {
             margin: 0;
             cursor: pointer;
-            color: #666;
-        }
-
-        .forgot-password {
-            color: #667eea;
-            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
             font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .forgot-password:hover {
-            color: #764ba2;
-            text-decoration: underline;
         }
 
         .login-box button {
             width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
+            padding: 14px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            color: #333333;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
         }
 
         .login-box button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
         }
 
         .login-box button:active {
             transform: translateY(0);
         }
 
-        .register-link {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .register-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .register-link a:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
-
-        /* Responsive */
         @media (max-width: 480px) {
             .login-box {
-                padding: 40px 25px;
+                padding: 35px 25px;
                 margin: 20px;
+                border-radius: 15px;
             }
 
             .login-box h2 {
-                font-size: 24px;
+                font-size: 28px;
+                margin-bottom: 25px;
             }
 
             .form-options {
                 flex-direction: column;
-                gap: 12px;
+                gap: 15px;
                 align-items: flex-start;
             }
         }
@@ -291,42 +287,34 @@ LOGIN_TEMPLATE = """
             <form method="post" id="loginForm">
                 <!-- Username Field -->
                 <div class="form-group">
-                    <label for="username">Username</label>
                     <div class="input-wrapper">
                         <i class="fas fa-user icon"></i>
-                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                        <input type="text" id="username" name="username" placeholder="Username" required>
                     </div>
                 </div>
 
                 <!-- Password Field -->
                 <div class="form-group">
-                    <label for="password">Password</label>
                     <div class="input-wrapper">
                         <i class="fas fa-lock icon"></i>
-                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <input type="password" id="password" name="password" placeholder="Password" required>
                         <button type="button" class="toggle-password" id="togglePassword" onclick="togglePassword()">
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Remember Me & Forgot Password -->
+                <!-- Remember Me -->
                 <div class="form-options">
                     <div class="checkbox-wrapper">
                         <input type="checkbox" id="remember" name="remember" value="on">
                         <label for="remember">Remember me</label>
                     </div>
-                    <a href="#" class="forgot-password">Forgot password?</a>
                 </div>
 
                 <!-- Login Button -->
                 <button type="submit">Login</button>
             </form>
-
-            <!-- Register Link -->
-            <div class="register-link">
-                Don't have an account? <a href="#">Register</a>
-            </div>
         </div>
     </div>
 
@@ -344,7 +332,7 @@ LOGIN_TEMPLATE = """
             }
         }
 
-        // Optional: Add visual feedback on form submission
+        // Add visual feedback on form submission
         document.getElementById('loginForm').addEventListener('submit', function() {
             const btn = this.querySelector('button[type="submit"]');
             btn.disabled = true;
