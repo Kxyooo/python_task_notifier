@@ -157,6 +157,11 @@ LOGIN_TEMPLATE = """
             align-items: center;
         }
 
+        /* ensure space for the eye icon inside inputs */
+        .form-group input {
+            padding-right: 40px; /* make room for toggle button */
+        }
+
         .form-group input {
             width: 100%;
             padding: 14px 16px 14px 45px;
@@ -190,18 +195,21 @@ LOGIN_TEMPLATE = """
 
         .toggle-password {
             position: absolute;
-            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 12px;
             background: transparent;
             border: none;
             color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             padding: 0;
             width: auto;
             height: auto;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 2;
         }
 
         .toggle-password:hover {
