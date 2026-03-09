@@ -191,15 +191,14 @@ LOGIN_TEMPLATE = """
         .toggle-password {
             position: absolute;
             right: 14px;
-            background: none;
+            background: transparent;
             border: none;
             color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-            padding: 2px;
-            width: 16px;
-            height: 16px;
+            font-size: 14px;
+            padding: 0;
+            width: auto;
+            height: auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -207,7 +206,6 @@ LOGIN_TEMPLATE = """
 
         .toggle-password:hover {
             color: rgba(255, 255, 255, 1);
-            transform: scale(1.1);
         }
 
 
